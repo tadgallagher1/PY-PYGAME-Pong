@@ -1,18 +1,18 @@
-
 # Import the pygame library and initialise the game engine
 import pygame
 from paddle import Paddle
+ 
 pygame.init()
-
+ 
 # Define some colors
 BLACK = (0,0,0)
 WHITE = (255,255,255)
-
+ 
 # Open a new window
 size = (700, 500)
-screen  = pygame.display.set_mode(size)
-pygame.display.set_caption("My Pong Game!")
-
+screen = pygame.display.set_mode(size)
+pygame.display.set_caption("Pong")
+ 
 paddleA = Paddle(WHITE, 10, 100)
 paddleA.rect.x = 20
 paddleA.rect.y = 200
@@ -20,43 +20,59 @@ paddleA.rect.y = 200
 paddleB = Paddle(WHITE, 10, 100)
 paddleB.rect.x = 670
 paddleB.rect.y = 200
-
+ 
+#This will be a list that will contain all the sprites we intend to use in our game.
+all_sprites_list = pygame.sprite.Group()
+ 
+# Add thepaddles to the list of sprites
+all_sprites_list.add(paddleA)
+all_sprites_list.add(paddleB)
+ 
 # The loop will carry on until the user exit the game (e.g. clicks the close button).
 carryOn = True
-
+ 
 # The clock will be used to control how fast the screen updates
 clock = pygame.time.Clock()
-
-"""
-1) Capturing Events: Used to constantly “listen” to user inputs and react to these. 
-It could be when the user use the keyboard or the mouse.
-2) Implementing the Game Logic. What happens when the game is running? Are cars moving forward, 
-aliens falling from the sky, ghosts chasing you, etc.
-3) Refreshing the screen by redrawing the stage and the sprites.
-
-"""
-
-#--------------------Main Loop--------------------------------
-while carryOn: 
-    # Main event loop 
-    for event in pygame.event.get():  # The user did something
-        if event.type == pygame.QUIT:  # If the user clicked close (upper corner) 
-            carryOn = false  # Exit loop
-            
+ 
+# -------- Main Program Loop -----------
+while carryOn:
+    # --- Main event loop
+    for event in pygame.event.get(): # User did something
+        if event.type == pygame.QUIT: # If user clicked close
+              carryOn = False # Flag that we are done so we exit this loop
+        elif event.type==pygame.KEYDOWN:
+                if event.key==pygame.K_x: #Pressing the x Key will quit the game
+                     carryOn=False
+ 
+    #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        paddleA.moveUp(5)
+    if keys[pygame.K_s]:
+        paddleA.moveDown(5)
+    if keys[pygame.K_UP]:
+        paddleB.moveUp(5)
+    if keys[pygame.K_DOWN]:
+        paddleB.moveDown(5)    
+ 
     # --- Game logic should go here
-    
-    
-    
+    all_sprites_list.update()
+ 
+ 
     # --- Drawing code should go here
-    # Clear/Fill the screen with black
+    # First, clear the screen to black. 
     screen.fill(BLACK)
-    # Draw the net / lines
+    #Draw the net
     pygame.draw.line(screen, WHITE, [349, 0], [349, 500], 5)
     
-    # Draw the screen
+    #Now let's draw all the sprites in one go. (For now we only have 2 sprites!)
+    all_sprites_list.draw(screen) 
+ 
+    # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
-    
+     
     # --- Limit to 60 frames per second
-    clock.tick(60) 
-    
-pygame.quit()            
+    clock.tick(60)
+ 
+#Once we have exited the main program loop we can stop the game engine:
+pygame.quit()
