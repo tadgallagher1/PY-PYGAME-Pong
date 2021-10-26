@@ -1,6 +1,42 @@
+
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
 # Import the pygame library and initialise the game engine
 import pygame
 from paddle import Paddle
+from ball import Ball
  
 pygame.init()
  
@@ -21,18 +57,27 @@ paddleB = Paddle(WHITE, 10, 100)
 paddleB.rect.x = 670
 paddleB.rect.y = 200
  
+ball = Ball(WHITE,10,10)
+ball.rect.x = 345
+ball.rect.y = 195
+ 
 #This will be a list that will contain all the sprites we intend to use in our game.
 all_sprites_list = pygame.sprite.Group()
  
-# Add thepaddles to the list of sprites
+# Add the car to the list of objects
 all_sprites_list.add(paddleA)
 all_sprites_list.add(paddleB)
+all_sprites_list.add(ball)
  
 # The loop will carry on until the user exit the game (e.g. clicks the close button).
 carryOn = True
  
 # The clock will be used to control how fast the screen updates
 clock = pygame.time.Clock()
+ 
+#Initialise player scores
+scoreA = 0
+scoreB = 0
  
 # -------- Main Program Loop -----------
 while carryOn:
@@ -44,7 +89,7 @@ while carryOn:
                 if event.key==pygame.K_x: #Pressing the x Key will quit the game
                      carryOn=False
  
-    #Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B) 
+    #Moving the paddles when the use uses the arrow keys (player A) or "W/S" keys (player B) 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
         paddleA.moveUp(5)
@@ -57,8 +102,23 @@ while carryOn:
  
     # --- Game logic should go here
     all_sprites_list.update()
+    
+    #Check if the ball is bouncing against any of the 4 walls:
+    if ball.rect.x>=690:
+        scoreA+=1
+        ball.velocity[0] = -ball.velocity[0]
+    if ball.rect.x<=0:
+        scoreB+=1
+        ball.velocity[0] = -ball.velocity[0]
+    if ball.rect.y>490:
+        ball.velocity[1] = -ball.velocity[1]
+    if ball.rect.y<0:
+        ball.velocity[1] = -ball.velocity[1]     
  
- 
+    #Detect collisions between the ball and the paddles
+    if pygame.sprite.collide_mask(ball, paddleA) or pygame.sprite.collide_mask(ball, paddleB):
+      ball.bounce()
+    
     # --- Drawing code should go here
     # First, clear the screen to black. 
     screen.fill(BLACK)
@@ -67,6 +127,13 @@ while carryOn:
     
     #Now let's draw all the sprites in one go. (For now we only have 2 sprites!)
     all_sprites_list.draw(screen) 
+ 
+    #Display scores:
+    font = pygame.font.Font(None, 74)
+    text = font.render(str(scoreA), 1, WHITE)
+    screen.blit(text, (250,10))
+    text = font.render(str(scoreB), 1, WHITE)
+    screen.blit(text, (420,10))
  
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
